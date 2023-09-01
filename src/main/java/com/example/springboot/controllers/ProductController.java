@@ -21,22 +21,36 @@ public class ProductController {
     ProductRepository productRepository;
 
     @PostMapping("/products")
-    public ResponseEntity<Product> postProduct(@RequestBody @Valid ProductRecordDto productDto){
+    public ResponseEntity<Product> postProduct(@RequestBody @Valid ProductRecordDto productDto) {
         var productModel = new Product();
         BeanUtils.copyProperties(productDto, productModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(productModel));
     }
+
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getAllProducts(){
+    public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.findAll());
     }
+
     @GetMapping("/products/{id}")
-    public ResponseEntity<Object> getProductById(@PathVariable(value="id") UUID id){
+    public ResponseEntity<Object> getProductById(@PathVariable(value = "id") UUID id) {
         Optional<Product> product = productRepository.findById(id);
-        if(product.isEmpty())
-        {
+        if (product.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado");
         }
         return ResponseEntity.status(HttpStatus.OK).body(product.get());
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Object> updateProduct(@PathVariable(value = "id") UUID id,
+                                                @RequestBody @Valid ProductRecordDto productDto) {
+        Optional<Product> product = productRepository.findById(id);
+        if(product.isEmpty())
+        {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto Não Encontrado");
+        }
+        var productUpdated = product.get();
+        BeanUtils.copyProperties(productDto, productUpdated);
+        return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(productUpdated));
     }
 }
